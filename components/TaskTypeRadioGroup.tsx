@@ -29,7 +29,7 @@ const types = [
 
 
 function TaskTypeRadioGroup() {
-  const [setNewTaskType, NewTaskType] = useBoardStore((state) => [
+  const [setNewTaskType, newTaskType] = useBoardStore((state) => [
     state.setNewTaskType,
     state.newTaskType,
   ]);
@@ -38,7 +38,7 @@ function TaskTypeRadioGroup() {
     <div className="w-full py-5">
       <div className="mx-auto w-full max-w-md"> 
         <RadioGroup 
-          value={NewTaskType}
+          value={newTaskType}
           onChange={(e) => {
             setNewTaskType(e);
           }}

@@ -2,15 +2,20 @@
 
 // check headless UI diaglog transition documentation
 
-import { useState, Fragment, FormEvent } from 'react'
+import { useState, Fragment, FormEvent, useRef } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
 import { useModalStore } from '@/store/ModalStore';
 import { useBoardStore } from '@/store/BoardStore';
 import TaskTypeRadioGroup from './TaskTypeRadioGroup';
+import Image from 'next/image';
+import { PhotoIcon } from '@heroicons/react/16/solid';
 
 
 function Modal() {
-  const [addTask, newTaskInput, setNewTaskInput, newTaskType] = useBoardStore((state) => [
+  const imagePickerRef = useRef<HTMLInputElement>(null);
+  const [image, setImage, addTask, newTaskInput, setNewTaskInput, newTaskType] = useBoardStore((state) => [
+    state.image,
+    state.setImage,
     state.addTask,
     state.newTaskInput,
     state.setNewTaskInput,
@@ -27,8 +32,9 @@ function Modal() {
     e.preventDefault();
     if (!newTaskInput) return;
 
-    addTask(newTaskInput, newTaskType);
-    
+    addTask(newTaskInput, newTaskType, image);
+
+    setImage(null);
     closeModal();
   }
   return (
@@ -36,7 +42,7 @@ function Modal() {
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog 
         as="form"
-        onSubmit={e => handleSubmit}
+        onSubmit={handleSubmit}
         className="relative z-10"
         onClose={closeModal}>
           <Transition.Child 
@@ -70,7 +76,7 @@ function Modal() {
                 as="h3"
                 className="text-lg font-medium leading-6 text-gray-900 pb-2"
               >
-                Add a Task
+                Add Task
               </Dialog.Title>
 
 
@@ -85,8 +91,46 @@ function Modal() {
               </div>
 
               <TaskTypeRadioGroup />
+
               <div>
-                <p>(img upload to be implemented)</p>
+                <button 
+                  type="button"
+                  onClick={() => {
+                    imagePickerRef.current?.click()
+                  }} 
+                  className="w-full border border-grey-300 rounded-md outline-none p-5 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2">
+                  <PhotoIcon 
+                    className="h-6 w-6 mr-2 inline-block"
+                  />
+                  Upload Image
+                </button>
+
+                {image && (
+                  <Image 
+                    alt="Uploaded Image"
+                    width={200}
+                    height={200}
+                    className="w-full h-44 object-cover mt-2 filter hover:grayscale transition-all duration-150 cursor-not-allowed"
+                    src={URL.createObjectURL(image)}
+
+                    onClick={() => {
+                      setImage(null);
+                    }}
+                  />
+                )}
+
+                <input 
+                  type="file" 
+                  ref={imagePickerRef}
+                  hidden
+                  onChange={(e) => {
+                    // check e is an image
+                    if (!e.target.files![0].type.startsWith("image/")) return;
+                    setImage(e.target.files![0])
+                  }}
+                 />
+
+
               </div>
 
               <div className='mt-4'>
